@@ -11,15 +11,19 @@ import com.iu.action.ActionForward;
 import com.iu.page.SearchMakePage;
 import com.iu.page.SearchPager;
 import com.iu.page.SearchRow;
+import com.iu.upload.UploadDAO;
+import com.iu.upload.UploadDTO;
 import com.oreilly.servlet.MultipartRequest;
 import com.oreilly.servlet.multipart.DefaultFileRenamePolicy;
 
 public class NoticeService implements Action {
 	
 	private NoticeDAO noticeDAO;
+	private UploadDAO uploadDAO;
 	
 	public NoticeService() {
 		noticeDAO = new NoticeDAO();
+		uploadDAO = new UploadDAO();
 	}
 
 	@Override
@@ -70,9 +74,11 @@ public class NoticeService implements Action {
 		ActionForward actionForward = new ActionForward();
 		
 		NoticeDTO noticeDTO=null;
+		UploadDTO uploadDTO=null;
 		try {
 			int num = Integer.parseInt(request.getParameter("num"));
 			noticeDTO = noticeDAO.selectOne(num);
+			uploadDTO = uploadDAO.selectOne(num);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -80,6 +86,7 @@ public class NoticeService implements Action {
 		String path="";
 		if(noticeDTO != null) {
 			request.setAttribute("dto", noticeDTO);
+			request.setAttribute("upload", uploadDTO);
 			path ="../WEB-INF/views/notice/noticeSelect.jsp";
 		}else {
 			request.setAttribute("message", "No Data");
@@ -102,10 +109,11 @@ public class NoticeService implements Action {
 		String path="../WEB-INF/views/notice/noticeWrite.jsp";
 		
 		if(method.equals("POST")) {
-			NoticeDTO noticeDTO = new NoticeDTO();
+			NoticeDTO noticeDTO = new NoticeDTO();//
 			//1. request를 하나로 합치기
+			//파일을 저장할 디스크 경로(C:
 			String saveDirectory=request.getServletContext().getRealPath("upload");
-			//System.out.println(saveDirectory);
+			System.out.println(saveDirectory);
 			int maxPostSize=1024*1024*10;//byte
 			String encoding = "UTF-8";
 			MultipartRequest multi=null;
@@ -121,9 +129,10 @@ public class NoticeService implements Action {
 			String fileName = multi.getFilesystemName("f1");//파일의 파라미터이름
 			//클라이언트가 업로드 할때 파일 이름
 			String oName = multi.getOriginalFileName("f1");//파일의 파라미터 이름
-			System.out.println("filename : "+fileName);
-			System.out.println("Oname : "+oName);
 			
+			UploadDTO uploadDTO = new UploadDTO();
+			uploadDTO.setFname(fileName);
+			uploadDTO.setOname(oName);
 			
 			
 			
@@ -133,7 +142,13 @@ public class NoticeService implements Action {
 			
 			int result=0;
 			try {
+				int num = noticeDAO.getNum();
+				noticeDTO.setNum(num);
 				result = noticeDAO.insert(noticeDTO);
+						 
+				uploadDTO.setNum(num);
+				result=uploadDAO.insert(uploadDTO);
+			
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

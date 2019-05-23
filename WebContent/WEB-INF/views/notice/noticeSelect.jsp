@@ -20,6 +20,7 @@
 		<h1>Writer : ${dto.writer}</h1>
 		<h1>Param    : ${param.num ge dto.num}</h1>
 		<h1>Writer : ${dto.writer ne 'test'}</h1>
+		<h1>Upload : <a href="../upload/${upload.fname}">${upload.oname}</a></h1>
 	
 	</div>
 	
