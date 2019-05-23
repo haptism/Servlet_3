@@ -49,37 +49,35 @@ public class NoticeDAO {
 		return result;
 	}
 	
-	//insert
-	public int insert(NoticeDTO noticeDTO)throws Exception{
+	//sequence
+	public int getNum()throws Exception{
 		int result=0;
 		Connection con = DBConnector.getConnect();
-		String sql ="insert into notice values(notice_seq.nextval, ?,?,?, sysdate,0)";
-		PreparedStatement st = con.prepareStatement(sql);
-		st.setString(1, noticeDTO.getTitle());
-		st.setString(2, noticeDTO.getContents());
-		st.setString(3, noticeDTO.getWriter());
-		result = st.executeUpdate();
-		DBConnector.disConnect(st, con);
+		String sql ="select notice_seq.nextval from dual";
+		PreparedStatement st =con.prepareStatement(sql);
+		ResultSet rs = st.executeQuery();
+		rs.next();
+		result=rs.getInt(1);
+		DBConnector.disConnect(rs, st, con);
 		return result;
 	}
 	
-	public static void main(String[] args) {
-		NoticeDAO noticeDAO = new NoticeDAO();
-		for(int i=0;i<100;i++) {
-			NoticeDTO n = new NoticeDTO();
-			n.setContents("contents"+i);
-			n.setTitle("title"+i);
-			n.setWriter("writer"+i);
-			try {
-				noticeDAO.insert(n);
-				Thread.sleep(100);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
+	//insert
+	public int insert(NoticeDTO noticeDTO, Connection con)throws Exception{
+		int result=0;
+		
+		String sql ="insert into notice values(?,?,?,?, sysdate,0)";
+		PreparedStatement st = con.prepareStatement(sql);
+		st.setInt(1, noticeDTO.getNum());
+		st.setString(2, noticeDTO.getTitle());
+		st.setString(3, noticeDTO.getContents());
+		st.setString(4, noticeDTO.getWriter());
+		result = st.executeUpdate();
+		st.close();
+		return result;
 	}
 	
+
 	//selectOne
 	public NoticeDTO selectOne(int num)throws Exception{
 		NoticeDTO noticeDTO= null;
