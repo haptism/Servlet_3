@@ -96,6 +96,7 @@ public class NoticeService implements Action {
 			request.setAttribute("path", "./noticeList");
 			path="../WEB-INF/views/common/result.jsp";
 		}
+		System.out.println(noticeDTO);
 		//글이 있으면 출력
 		//글이 없으면 삭제되었거나 없는 글입니다.(alert) 리스트로 
 		actionForward.setCheck(true);
